@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Clase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Http;
+use App\Helper\Helper;
 
 class ClaseController extends Controller
 {
@@ -14,12 +14,9 @@ class ClaseController extends Controller
     }
     
     public function store(Request $request){
-        $token = $request->header('authorization');        
-        if(!$user = $this->validarToken($token)){
-            return response()->json(['message' => 'no autorizado'], 401);
-        }              
-        if($user->rol != 'admin'){
-            return response()->json(['message' => 'no autorizado'], 401);
+        $response = Helper::validarToken($request);
+        if($response != 'auth'){
+            return $response;
         }
 
         $validator = Validator::make($request->all(), [
@@ -49,12 +46,9 @@ class ClaseController extends Controller
                 'errors' => $e->getMessage(),
             ], 400);
         }                
-    }
+    } 
 
-    public function validarToken($token){                 
-        $response = Http::withHeaders([
-            'Authorization' => $token,
-        ])->post('http://127.0.0.1:8001/api/validarToken');        
-        return $response->object();
+    public function aggAlumnoCurso(Request $request){
+
     }
 }

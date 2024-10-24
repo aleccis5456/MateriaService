@@ -2,6 +2,7 @@
 
 namespace App\Helper;
 
+use App\Models\Curso;
 use App\Models\Materia;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -36,7 +37,39 @@ class Helper
     }
 
     public static function arrStoreCursos(Request $request) {
-        
+        $cursos = $request->bulk;        
+        $cursosCreados = [];             
+        foreach($cursos as $curso){
+            $validator = Validator::make($curso, [
+                'curso' => 'required|string',
+                'promocion' => 'required|numeric|digits:4',
+                'bachillerato' => 'required|string'
+            ]);
+            if($validator->fails()){
+                return response()->json([
+                    'message' => 'error en la validacion del helper',
+                    'errors' => $validator->errors(),
+                ]);
+            }
+            try{
+                $newCurso = Curso::create([
+                    'curso' => $curso['curso'],
+                    'promocion' => $curso['promocion'],
+                    'bachillerato' => $curso['bachillerato'],
+                ]);
+
+                $cursosCreados[] = $newCurso;
+            }catch(\Exception $e){
+                return response()->json([
+                    'message' => $e->getMessage(),
+                ]);
+            }                        
+        }
+
+        return response()->json([
+            'message' => 'cursos creados',
+            'cursos' => $cursosCreados,
+        ]);
     }
 
     public static function validarToken(Request $request){        

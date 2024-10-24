@@ -17,26 +17,29 @@ class CursoController extends Controller
         $response = Helper::validarToken($request); 
         if($response != 'auth'){
             return $response;
-        }
-
-        $validator = Validator::make($request->all(), [
-            "curso" => 'required|string',
-            "promocion" => "required|numeric|digits:4",
-            "bachillerato" => 'required|string'
-        ]);
-
-        if($validator->fails()){
-            return response()->json([
-                'message' => 'error en la validacion',
-                'errors' => $validator->errors(),
+        }                  
+        if($request->has('bulk')){
+            return Helper::arrStoreCursos($request);
+        }else{        
+            $validator = Validator::make($request->all(), [
+                "curso" => 'required|string',
+                "promocion" => "required|numeric|digits:4",
+                "bachillerato" => 'required|string'
             ]);
-        }
-
-        $curso = Curso::create($request->all());
-        return response()->json([
-            'message' => 'curso creado',
-            'curso' => $curso
-        ]);
+    
+            if($validator->fails()){
+                return response()->json([
+                    'message' => 'error en la validacion',
+                    'errors' => $validator->errors(),
+                ]);
+            }
+    
+            $curso = Curso::create($request->all());
+            return response()->json([
+                'message' => 'curso creado',
+                'curso' => $curso
+            ]);
+        }        
     }
 
     public function update(Request $request, String $id){
@@ -46,7 +49,9 @@ class CursoController extends Controller
         }
 
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string'
+            "curso" => 'sometimes|string',
+            "promocion" => "sometimes|numeric|digits:4",
+            "bachillerato" => 'sometimes|string'
         ]);
 
         if($validator->fails()){
@@ -69,5 +74,15 @@ class CursoController extends Controller
             'message' => 'curso actualizado',
             'curso' => $curso
         ]);
+    }
+
+    public function destroy(String $id){
+        $curso = Curso::destroy($id);
+        if(!$curso){
+            return response()->json([
+                'message' => 'curso no encontrado'
+            ], 404);
+        }
+        return response()->json(['message' => 'cursos eliminado']);
     }
 }

@@ -7,8 +7,7 @@ use App\Http\Controllers\TareaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/materias', [MateriaController::class, 'index']);
-Route::post('/materias', [MateriaController::class,'store']);
+Route::apiResource('/materias', MateriaController::class);
 
 Route::post('/clases', [ClaseController::class, 'store']);
 

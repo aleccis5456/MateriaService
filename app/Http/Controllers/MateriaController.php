@@ -56,16 +56,41 @@ class MateriaController extends Controller
         }
         else{
             return Helper::arrStoreMaterias($request);
-        }
-        
+        }        
     }
-    
+
+    public function update(Request $request, String $id){
+        $response = Helper::validarToken($request);
+        if($response != 'auth'){
+            return $response;
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string'
+        ]);
+        if($validator->fails()){
+            return response()->json([
+                'message' => 'error en la validacion',
+                'errors' => $validator->errors(),
+            ]);
+        }
+        $materia = Materia::find($id);
+        if(!$materia){
+            return response()->json(['message' => 'materia no encontrada'], 404);
+        }
+        $materia->update($request->all());
+
+        return response()->json([
+            'message' => 'materia actualizada',
+            'materia' => $materia
+        ]);
+    }
+
     public function destroy(String $id){
         $materia = Materia::destroy($id);
         if(!$materia){
             return response()->json(['message' => 'no se pudo borrar'], 400);
         }
-
         return response()->json('materia borrado', 200);
     }
 }
