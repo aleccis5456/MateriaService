@@ -17,38 +17,53 @@ class ClaseController extends Controller
         $response = Helper::validarToken($request);
         if($response != 'auth'){
             return $response;
-        }
-
-        $validator = Validator::make($request->all(), [
-            'profesor_id' => 'required|numeric|exists:profesores,id',
-            'curso_id' => 'required|numeric|exists:cursos,id',
-            'materia_id' => 'required|numeric|exists:materias,id',
-            'hora_entrada' => 'required|date_format:H:i',
-            'hora_salida' => 'required|date_format:H:i',
-            'aula' => 'nullable|string',
-        ]);
-
-        if($validator->fails()){
-            return response()->json([
-                'message' => 'error en la validacion',
-                'errors' => $validator->errors(),
+        }        
+        if($request->has('bulk')){
+            return Helper::arrStoreClases($request);
+        }else{
+            $validator = Validator::make($request->all(), [
+                'profesor_id' => 'required|numeric|exists:profesores,id',
+                'curso_id' => 'required|numeric|exists:cursos,id',
+                'materia_id' => 'required|numeric|exists:materias,id',
+                'hora_entrada' => 'required|date_format:H:i',
+                'hora_salida' => 'required|date_format:H:i',
+                'aula' => 'nullable|string',
             ]);
-        }
-        try{
-            $clase = Clase::create($request->all());        
-            return response()->json([
-                'message' => 'clase creada',
-                'clase' => $clase
-            ]);
-        }catch(\Exception $e){
-            return response()->json([
-                'message' => 'error al crear la clase',
-                'errors' => $e->getMessage(),
-            ], 400);
-        }                
+    
+            if($validator->fails()){
+                return response()->json([
+                    'message' => 'error en la validacion',
+                    'errors' => $validator->errors(),
+                ]);
+            }
+            try{
+                $clase = Clase::create($request->all());        
+                return response()->json([
+                    'message' => 'clase creada',
+                    'clase' => $clase
+                ]);
+            }catch(\Exception $e){
+                return response()->json([
+                    'message' => 'error al crear la clase',
+                    'errors' => $e->getMessage(),
+                ], 400);
+            }                
+        }        
     } 
+    //pendiente
+    public function update(Request $request, String $id){
 
-    public function aggAlumnoCurso(Request $request){
+    }
 
+    public function destroy(String $id){
+        $clase = Clase::destroy($id);
+        if(!$clase){
+            return response()->json([
+                'message' => 'clase no encontrada'
+            ], 404);
+        }
+        return response()->json([
+            'message' => 'clase eliminada'
+        ]);
     }
 }
